@@ -1,4 +1,4 @@
-Nitrox Analyser (Divesoft DNA clone)
+Nitrox Analyser V2 (Divesoft DNA clone)
 
 Updated from basic version, use ADS1110 ADC for better accuracy. Use ESP32C3 board with OLED to show oxygen percentage and voltage. Include a supercapacitor for power, can be used unpluged now.
 
