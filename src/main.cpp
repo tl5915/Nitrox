@@ -37,8 +37,7 @@ void setup() {
   // Power Conservation
   esp_wifi_stop();                            // WiFi off
   esp_bt_controller_disable();                // Bluetooth off
-  setCpuFrequencyMhz(20);                     // Reduce CPU frequency
-  esp_sleep_enable_timer_wakeup(500000);      // 500ms interval
+  setCpuFrequencyMhz(10);                     // Reduce CPU frequency
 
   // I2C Initialisation
   Wire.begin(SDAPin, SCLPin);                 // I2C start
@@ -47,18 +46,16 @@ void setup() {
   // Display Initialisation
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // OLED start
   display.setTextColor(SSD1306_WHITE);        // Set text colour
-  display.clearDisplay();                     // Initialise OLED
 
   // ADS1110 Initialisation
   Wire.beginTransmission(0x48);               // Connection check
-  uint8_t error = Wire.endTransmission();
-  if (error != 0) {
+  if (Wire.endTransmission() != 0) {
     display.clearDisplay();
     display.setTextSize(4);
     display.setCursor(30, 28);
     display.print(F("Err"));
     display.display();
-    while (true) delay(100);
+    while (true);
   }
   ads.reset();                                // ADS1110 start
   ads.setVref(INT_REF);                       // Internal Vref
@@ -76,7 +73,6 @@ void setup() {
   if (isnan(pureoxygenVoltage) || pureoxygenVoltage <= 0.0) {
     pureoxygenVoltage = defaultPureOxygenVoltage;
   }
-  delay(100);
 
   // Calibration
   oxygenRaw = ads.getData();                             // ADC reading
@@ -92,7 +88,8 @@ void setup() {
     display.setCursor(30, 28);
     display.print(F("21%"));
     display.display();
-    delay(500);
+    esp_sleep_enable_timer_wakeup(1000000);              // 1000 ms
+    esp_light_sleep_start();
   }
   if (oxygenVoltage > 30.0) {                            // 99% calibration
     pureoxygenVoltage = oxygenVoltage;
@@ -103,9 +100,12 @@ void setup() {
     display.setCursor(30, 28);
     display.print(F("99%"));
     display.display();
-    delay(500);
+    esp_sleep_enable_timer_wakeup(1000000);              // 1000 ms
+    esp_light_sleep_start();
   }
-  if (pureoxygenVoltage > oxygencalVoltage) {            // 2-point calibration
+
+  // 2-point calibration
+  if (pureoxygenVoltage > oxygencalVoltage) {
     isTwoPointCalibrated = true;
   } else {
     isTwoPointCalibrated = false;
@@ -118,12 +118,12 @@ void loop() {
   oxygenRaw = ads.getData();                                  // ADC reading
   oxygenVoltage = fabs(oxygenRaw * 0.0078125);                // mV at gain 8, 256 mV range
   oxygenmvDisplay = constrain(oxygenVoltage, 0.00, 99.99);    // mV display: min 0.00, max 99.99
-  if (!isTwoPointCalibrated) {
+  if (!isTwoPointCalibrated) {                                // 1-point calibration
     oxygenPercentage = (oxygenVoltage / oxygencalVoltage) * 20.9;
-  } else {
+  } else {                                                    // 2-point calibration
     oxygenPercentage = 20.9 + ((oxygenVoltage - oxygencalVoltage) / (pureoxygenVoltage - oxygencalVoltage)) * (99.0 - 20.9);
   }
-  oxygenPercentage = constrain(oxygenPercentage, 0.0, 99.9);  // % display: min 0.0, max 99.9
+  oxygenPercentage = constrain(oxygenPercentage, 0.0, 99.9);  // Percentage display: min 0.0, max 99.9
 
   // Format
   int intPart = (int)oxygenPercentage;
@@ -161,5 +161,6 @@ void loop() {
   display.display();
   
   // Sleep
+  esp_sleep_enable_timer_wakeup(500000);  // 500ms interval
   esp_light_sleep_start();
 }
