@@ -20,13 +20,11 @@ Material required:
 (https://amzn.eu/d/fZkoRWB)
 8. 5.5V 5F H-Type Button Super Capacitor
 (https://amzn.eu/d/1qX6MRr)
-9. 10 ohm resistor
-(https://amzn.eu/d/0bXwUK8R)
-10. Prototype Board(cut to 8x8, do not use edge of the board, too wide)
+9. Prototype Board(cut to 8x8, do not use edge of the board, too wide)
 (https://amzn.eu/d/03sAWb33)
-11. 8-Pin Female Headers
+10. 8-Pin Female Headers
 (https://amzn.eu/d/0gmsWj1w)
-12. JST-XH (2.54mm) 3-Pin Female Connector (cut the locking arrows off to fit Molex header on oxygen cell)
+11. JST-XH (2.54mm) 3-Pin Female Connector (cut the locking arrows off to fit Molex header on oxygen cell)
 (https://amzn.eu/d/00dJxi24)
 
 
@@ -38,10 +36,9 @@ Circuit connection:
 4. ADS1110 SDA connects to ESP32C3 pin 5 (GPIO5)
 5. ADS1110 VIN- connects to Oxygen Cell pin 1 (-)
 6. ADS1110 VIN+ connects to Oxygen Cell pin 3 (+)
-7. ESP32-C3 V5 pin (Vcc) connects to 10 ohm resistor
-8. The other end of 10 ohm resistor connects to the switch
-9. The other end of the switch connects to + side of the super capacitor
-10. ESP32-C3 GD pin (Gnd) connects to - side of the super capacitor (marked by black arrow)
+7. ESP32-C3 V5 pin (Vcc) connects to the switch
+8. The other end of the switch connects to + side of the super capacitor
+9. ESP32-C3 GD pin (Gnd) connects to - side of the super capacitor (marked by black arrow)
 
 (polarity of the oxygen cell pins doesn't matter, software will convert to differential voltage)
 
