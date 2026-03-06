@@ -35,20 +35,20 @@ float oxygenPercentage = 0.0;
 
 void setup() {
   // Power Conservation
-  esp_wifi_stop();                            // WiFi off
-  esp_bt_controller_disable();                // Bluetooth off
-  setCpuFrequencyMhz(10);                     // Reduce CPU frequency
+  esp_wifi_stop();              // WiFi off
+  esp_bt_controller_disable();  // Bluetooth off
+  setCpuFrequencyMhz(10);       // Reduce CPU frequency
 
   // I2C Initialisation
-  Wire.begin(SDAPin, SCLPin);                 // I2C start
-  Wire.setClock(400000);                      // I2C clock speed 400kHz
+  Wire.begin(SDAPin, SCLPin);   // I2C start
+  Wire.setClock(400000);        // I2C clock speed 400kHz
 
   // Display Initialisation
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // OLED start
   display.setTextColor(SSD1306_WHITE);        // Set text colour
 
   // ADS1110 Initialisation
-  Wire.beginTransmission(0x48);               // Connection check
+  Wire.beginTransmission(0x48);  // Connection check
   if (Wire.endTransmission() != 0) {
     display.clearDisplay();
     display.setTextSize(4);
@@ -57,14 +57,14 @@ void setup() {
     display.display();
     while (true);
   }
-  ads.reset();                                // ADS1110 start
-  ads.setVref(INT_REF);                       // Internal Vref
-  ads.setGain(GAIN_8);                        // Gain 8 (256mV)
-  ads.setSampleRate(SPS_15);                  // 15 SPS
-  ads.setConMode(CONT);                       // Continuous conversion
+  ads.reset();                // ADS1110 start
+  ads.setVref(INT_REF);       // Internal Vref
+  ads.setGain(GAIN_8);        // Gain 8 (256mV)
+  ads.setSampleRate(SPS_15);  // 15 SPS
+  ads.setConMode(CONT);       // Continuous conversion
 
   // EEPROM Initialisation
-  EEPROM.begin(8);                            // EEPROM start
+  EEPROM.begin(8);  // EEPROM start
   EEPROM.get(ADDR_OXYGEN_CAL_VOLTAGE, oxygencalVoltage);
   EEPROM.get(ADDR_PURE_OXYGEN_VOLTAGE, pureoxygenVoltage);
   if (isnan(oxygencalVoltage) || oxygencalVoltage <= 0.0) {
@@ -75,6 +75,8 @@ void setup() {
   }
 
   // Calibration
+  ads.getData();                                         // First reading
+  delay(100);                                            // 67 ms conversion time
   oxygenRaw = ads.getData();                             // ADC reading
   oxygenVoltage = fabs(oxygenRaw * 0.0078125);           // mV at gain 8, 256 mV range
   if (oxygenVoltage > 5.0 && oxygenVoltage < 15.0) {     // 21% calibration
@@ -82,14 +84,14 @@ void setup() {
       oxygencalVoltage = oxygenVoltage;
       EEPROM.put(ADDR_OXYGEN_CAL_VOLTAGE, oxygencalVoltage);
       EEPROM.commit();
+      display.clearDisplay();
+      display.setTextSize(4);
+      display.setCursor(30, 28);
+      display.print(F("21%"));
+      display.display();
+      esp_sleep_enable_timer_wakeup(500000);             // Display 500 ms
+      esp_light_sleep_start();
     }
-    display.clearDisplay();
-    display.setTextSize(4);
-    display.setCursor(30, 28);
-    display.print(F("21%"));
-    display.display();
-    esp_sleep_enable_timer_wakeup(1000000);              // 1000 ms
-    esp_light_sleep_start();
   }
   if (oxygenVoltage > 30.0) {                            // 99% calibration
     pureoxygenVoltage = oxygenVoltage;
@@ -100,16 +102,34 @@ void setup() {
     display.setCursor(30, 28);
     display.print(F("99%"));
     display.display();
-    esp_sleep_enable_timer_wakeup(1000000);              // 1000 ms
+    esp_sleep_enable_timer_wakeup(500000);               // Display 500 ms
     esp_light_sleep_start();
   }
 
   // 2-point calibration
   if (pureoxygenVoltage > oxygencalVoltage) {
     isTwoPointCalibrated = true;
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setCursor(30, 28);
+    if (oxygencalVoltage < 10.0) {
+      display.print(F(" "));
+    }
+    display.print(oxygencalVoltage, 1);
+    display.print(F("mV"));
+    display.setCursor(30, 48);
+    display.print(pureoxygenVoltage, 1);
+    display.print(F("mV"));
+    display.display();
+    esp_sleep_enable_timer_wakeup(1000000);              // Display 1000 ms
+    esp_light_sleep_start();
   } else {
     isTwoPointCalibrated = false;
   }
+
+  // Flush data for first loop
+  ads.getData();  // Discard first reading
+  delay(100);     // 67 ms conversion time
 }
 
 
