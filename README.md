@@ -1,10 +1,7 @@
-Nitrox Analyser V2 (Divesoft DNA clone)
-
+# Nitrox Analyser V2 (Divesoft DNA clone)
 Updated from basic version, use ADS1110 ADC for better accuracy. Use ESP32C3 board with OLED to show oxygen percentage and voltage. Include a supercapacitor for power, can be used unpluged now.
 
-
-Material required:
-
+## Material
 1. Sensor tube to be 3D printed
 (https://makerworld.com/zh/models/2378291-scuba-diving-nitrox-analyser#profileId-2603933)
 2. Screen protector - transparent acrylic folder page, cut to approriate size
@@ -27,9 +24,7 @@ Material required:
 11. JST-XH (2.54mm) 3-Pin Female Connector (cut the locking arrows off to fit Molex header on oxygen cell)
 (https://amzn.eu/d/00dJxi24)
 
-
-Circuit connection:
-
+## Circuit connection
 1. ADS1110 VCC connects to ESP32C3 V3 pin (3V3)
 2. ADS1110 GND connects to ESP32C3 GD pin (Gnd)
 3. ADS1110 SCL connects to ESP32C3 pin 6 (GPIO6)
@@ -42,9 +37,7 @@ Circuit connection:
 
 (polarity of the oxygen cell pins doesn't matter, software will convert to differential voltage)
 
-
-Assembly:
-
+## Assembly
 1. Cut acylic sheet to appropriate size and place in the slot in electronics tube, secure it by pushing in the screen protector plug
 2. Wire all electonics as described above
 3. Place super capacitor in the seat in sensor tube, snap on electronics tube
@@ -56,9 +49,7 @@ Assembly:
 9. Connect molex connector to oxygen cell
 10. Snap on front cap
 
-
-UI instruction:
-
+## UI instruction
 - Charge the super capacitor with USB-C cable with switch on, charging takes 3 to 5 minutes. This will provide about 10 minutes working time for the analyser. Switch off after charging.
 - Switch on in air, analyser will calibrate automatically, screen shows 21% after air calibration (available when voltage is between 5 to 15 mV)
 - To calibrate with 99% oxygen, place censor on oxygen cylinder for 15 seconds when switched off. Switch on, screen shows 99% after oxygen calibration (available when voltage > 30 mV)
